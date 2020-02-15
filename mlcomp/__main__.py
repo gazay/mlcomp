@@ -1,3 +1,4 @@
+import subprocess
 from os.path import join
 from typing import Tuple
 
@@ -42,6 +43,12 @@ def _dag(config: str, debug: bool = False, control_reqs=True,
     config_text = yaml_dump(config_parsed)
 
     logger.info('config parsed', ComponentType.Client)
+
+    try:
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
+        config_parsed['info']['name'] += f'_{commit.decode("utf-8")[:6]}'
+    except Exception:
+        logger.info('commit not parsed')
 
     type_name = config_parsed['info'].get('type', 'standard')
     if type_name == DagType.Standard.name.lower():
